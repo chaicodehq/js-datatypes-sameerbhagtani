@@ -41,5 +41,78 @@
  *   // => { name: "Priya", totalMarks: 63, percentage: 31.5, grade: "F", ... }
  */
 export function generateReportCard(student) {
-  // Your code here
+    if (
+        typeof student !== "object" ||
+        student === null ||
+        Array.isArray(student)
+    )
+        return null;
+
+    const { name, marks } = student;
+
+    if (!name || typeof name !== "string" || name === "") return null;
+    if (
+        typeof marks !== "object" ||
+        marks === null ||
+        Array.isArray(marks) ||
+        Object.keys(marks).length === 0
+    )
+        return null;
+
+    for (const mark of Object.values(marks)) {
+        if (typeof mark !== "number" || mark < 0 || mark > 100) return null;
+    }
+
+    const subjectCount = Object.keys(marks).length;
+
+    const totalMarks = Object.values(marks).reduce(
+        (total, current) => total + current,
+    );
+
+    const percentage = parseFloat((totalMarks / subjectCount).toFixed(2));
+
+    let grade = "F";
+    if (percentage >= 90) grade = "A+";
+    else if (percentage >= 80) grade = "A";
+    else if (percentage >= 70) grade = "B";
+    else if (percentage >= 60) grade = "C";
+    else if (percentage >= 40) grade = "D";
+
+    const passedSubjects = Object.keys(marks).filter((sub) =>
+        marks[sub] >= 40 ? true : false,
+    );
+
+    const failedSubjects = Object.keys(marks).filter((sub) =>
+        marks[sub] < 40 ? true : false,
+    );
+
+    let highestSubject = null;
+    let highestMarks = -Infinity;
+
+    let lowestSubject = null;
+    let lowestMarks = Infinity;
+
+    for (const sub of Object.keys(marks)) {
+        if (marks[sub] > highestMarks) {
+            highestMarks = marks[sub];
+            highestSubject = sub;
+        }
+
+        if (marks[sub] < lowestMarks) {
+            lowestMarks = marks[sub];
+            lowestSubject = sub;
+        }
+    }
+
+    return {
+        name,
+        totalMarks,
+        percentage,
+        grade,
+        highestSubject,
+        lowestSubject,
+        passedSubjects,
+        failedSubjects,
+        subjectCount,
+    };
 }

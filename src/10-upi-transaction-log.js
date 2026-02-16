@@ -47,5 +47,93 @@
  *   //      frequentContact: "Swiggy", allAbove100: false, hasLargeTransaction: true }
  */
 export function analyzeUPITransactions(transactions) {
-  // Your code here
+    if (!Array.isArray(transactions) || transactions.length === 0) return null;
+
+    const validTransactions = transactions.filter(
+        (transaction) =>
+            transaction.amount > 0 &&
+            (transaction.type === "credit" || transaction.type === "debit"),
+    );
+
+    const transactionCount = validTransactions.length;
+
+    if (transactionCount === 0) return null;
+
+    const totalCredit = validTransactions.reduce((total, current) => {
+        if (current.type === "credit") return total + current.amount;
+        return total;
+    }, 0);
+
+    const totalDebit = validTransactions.reduce((total, current) => {
+        if (current.type === "debit") return total + current.amount;
+        return total;
+    }, 0);
+
+    const netBalance = totalCredit - totalDebit;
+
+    const avgTransaction = Math.round(
+        (totalCredit + totalDebit) / transactionCount,
+    );
+
+    let highestTransaction = null;
+    let highestAmount = -Infinity;
+
+    validTransactions.forEach((transaction) => {
+        if (transaction.amount > highestAmount) {
+            highestAmount = transaction.amount;
+            highestTransaction = transaction;
+        }
+    });
+
+    const categoryBreakdown = {};
+    validTransactions.forEach((transaction) => {
+        if (!Object.hasOwn(categoryBreakdown, transaction.category)) {
+            categoryBreakdown[transaction.category] = 0;
+        }
+
+        categoryBreakdown[transaction.category] += transaction.amount;
+    });
+
+    const frequentContactDict = {};
+    let highestFrequency = -Infinity;
+    validTransactions.forEach((transaction) => {
+        if (!Object.hasOwn(frequentContactDict, transaction.to)) {
+            frequentContactDict[transaction.to] = 0;
+        }
+
+        frequentContactDict[transaction.to]++;
+
+        highestFrequency = Math.max(
+            highestFrequency,
+            frequentContactDict[transaction.to],
+        );
+    });
+
+    let frequentContact;
+    for (let key in frequentContactDict) {
+        if (frequentContactDict[key] === highestFrequency) {
+            frequentContact = key;
+        }
+    }
+
+    const allAbove100 = validTransactions.every(
+        (transaction) => transaction.amount > 100,
+    );
+
+    const hasLargeTransaction = validTransactions.some(
+        (transaction) => transaction.amount >= 5000,
+    );
+
+    return {
+        totalCredit,
+        totalDebit,
+        netBalance,
+        transactionCount,
+        avgTransaction,
+        highestTransaction,
+        categoryBreakdown,
+        frequentContact,
+        allAbove100,
+        hasLargeTransaction,
+    };
 }

@@ -62,5 +62,58 @@
  *   // => { isValid: false, errors: { name: "...", email: "...", ... } }
  */
 export function validateForm(formData) {
-  // Your code here
+    const { name, email, phone, age, pincode, state, agreeTerms } = formData;
+
+    let errors = {};
+
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
+        errors.name = "Name must be 2-50 characters";
+    }
+
+    const trimmedEmail = email.trim();
+    const atFirst = trimmedEmail.indexOf("@");
+    const atLast = trimmedEmail.lastIndexOf("@");
+    if (
+        trimmedEmail === "" ||
+        atFirst === -1 ||
+        atFirst !== atLast ||
+        !trimmedEmail.slice(atFirst + 1).includes(".")
+    ) {
+        errors.email = "Invalid email format";
+    }
+
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+        errors.phone = "Invalid Indian phone number";
+    }
+
+    const parsedAge = parseFloat(age);
+    if (
+        isNaN(parsedAge) ||
+        !Number.isInteger(parsedAge) ||
+        parsedAge < 16 ||
+        parsedAge > 100
+    ) {
+        errors.age = "Age must be an integer between 16 and 100";
+    }
+
+    if (!/^[1-9]\d{5}$/.test(pincode)) {
+        errors.pincode = "Invalid Indian pincode";
+    }
+
+    const stateValue = state?.trim() ?? "";
+    if (!stateValue) {
+        errors.state = "State is required";
+    }
+
+    if (Boolean(agreeTerms) === false) {
+        errors.agreeTerms = "Must agree to terms";
+    }
+
+    const isValid = Object.keys(errors).length === 0;
+
+    return {
+        isValid,
+        errors,
+    };
 }
